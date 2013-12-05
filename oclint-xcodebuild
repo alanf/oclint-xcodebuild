@@ -150,6 +150,8 @@ def convert(input_file, output_file, is_excluded=None):
             try:
                 output.write("[")
                 cr = "\n"
+
+                processed_source_files = set()
                 while 1:
                     log_line = lines.next()
                     compilation_section_re = find_compileC(log_line)
@@ -162,8 +164,12 @@ def convert(input_file, output_file, is_excluded=None):
                             if not find_clang_command(log_line):
                                 continue
                             output_record = process_clang_command(log_line, directory)
+                            source_file = output_record['file']
+                            if source_file in processed_source_files:
+                                continue
                             output.write(cr)
                             output.write(json.dumps(output_record, indent=2))
+                            processed_source_files.add(source_file)
                             cr = ",\n"
                             break
                         continue
